@@ -1,4 +1,4 @@
-run_name: baseline_tnet
+run_name: starter_cnn
 seed: 0
 
 data:
@@ -8,12 +8,12 @@ data:
   image_size: 64
   channels: 1
   color_mode: grayscale
-  transform: baseline
+  transform: starter
   batch_size: 64
   num_workers: 2
 
 model:
-  name: tnet
+  name: starter_cnn
   pretrained: false
 
 training:
@@ -24,5 +24,4 @@ training:
   scheduler: none
   label_smoothing: 0.0
   early_stopping_patience: null
-  freeze_backbone_epochs: 0
   amp: false

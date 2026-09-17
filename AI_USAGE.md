@@ -20,7 +20,7 @@ interpretation, and final report.
 ## Verification performed by the student
 
 The student will review generated code, inspect the saved split summary, run
-the automated tests, and compare baseline behavior with the supplied notebook
+the automated tests, and compare starter-model behavior with the supplied notebook
 before accepting experimental conclusions.
 
 ## Incorrect, ineffective, or questionable suggestion
@@ -30,7 +30,7 @@ not invent an AI failure after the experiments.
 
 ## Important student decision
 
-The student chose to organize the project around three interpretable stages:
-the supplied CNN baseline, a deliberately modest CNN trained from scratch, and
-an improved pretrained CNN. Final architecture and training decisions remain
-subject to the student's review of validation evidence.
+The student chose to begin with the supplied CNN as a measured reference point.
+Any later architecture or training changes will be chosen after reviewing its
+validation behavior, computational cost, and failure modes rather than assuming
+in advance which experiments will succeed or fail.

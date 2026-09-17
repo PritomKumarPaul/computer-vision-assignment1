@@ -13,10 +13,6 @@ from torchvision.transforms import InterpolationMode
 from .utils import seed_worker
 
 
-IMAGENET_MEAN = [0.485, 0.456, 0.406]
-IMAGENET_STD = [0.229, 0.224, 0.225]
-
-
 class ManifestDataset(Dataset):
     """Image dataset backed by a checked-in CSV split manifest."""
 
@@ -47,78 +43,22 @@ class ManifestDataset(Dataset):
 def build_transforms(data_config: dict):
     profile = data_config["transform"]
     size = int(data_config["image_size"])
-    color_mode = data_config.get("color_mode", "rgb")
-    if color_mode not in {"rgb", "grayscale"}:
-        raise ValueError(f"color_mode must be 'rgb' or 'grayscale'; got {color_mode}")
-
-    if profile == "baseline":
-        shared = transforms.Compose(
-            [
-                transforms.Grayscale(num_output_channels=1),
-                transforms.Resize((size, size), interpolation=InterpolationMode.BILINEAR),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5], std=[0.5]),
-            ]
+    color_mode = data_config.get("color_mode", "grayscale")
+    if profile != "starter" or color_mode != "grayscale":
+        raise ValueError(
+            "The current experiment expects transform='starter' and "
+            "color_mode='grayscale'. Add later transforms only after forming "
+            "and documenting the next experimental hypothesis."
         )
-        return shared, shared
-
-    if profile == "basic_augmentation":
-        color_transform = (
-            [transforms.Grayscale(num_output_channels=3)]
-            if color_mode == "grayscale" else []
-        )
-        train_transform = transforms.Compose(
-            [
-                *color_transform,
-                transforms.RandomResizedCrop(
-                    size, scale=(0.80, 1.0), ratio=(0.85, 1.15),
-                    interpolation=InterpolationMode.BILINEAR,
-                ),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5] * 3, std=[0.5] * 3),
-            ]
-        )
-        eval_transform = transforms.Compose(
-            [
-                *color_transform,
-                transforms.Resize(size + 16, interpolation=InterpolationMode.BILINEAR),
-                transforms.CenterCrop(size),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5] * 3, std=[0.5] * 3),
-            ]
-        )
-        return train_transform, eval_transform
-
-    if profile == "imagenet_augmentation":
-        color_transform = (
-            [transforms.Grayscale(num_output_channels=3)]
-            if color_mode == "grayscale" else []
-        )
-        train_transform = transforms.Compose(
-            [
-                *color_transform,
-                transforms.RandomResizedCrop(
-                    size, scale=(0.70, 1.0), ratio=(0.80, 1.25),
-                    interpolation=InterpolationMode.BILINEAR,
-                ),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
-            ]
-        )
-        eval_transform = transforms.Compose(
-            [
-                *color_transform,
-                transforms.Resize(256, interpolation=InterpolationMode.BILINEAR),
-                transforms.CenterCrop(size),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
-            ]
-        )
-        return train_transform, eval_transform
-
-    raise ValueError(f"Unknown transform profile: {profile}")
+    shared = transforms.Compose(
+        [
+            transforms.Grayscale(num_output_channels=1),
+            transforms.Resize((size, size), interpolation=InterpolationMode.BILINEAR),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5], std=[0.5]),
+        ]
+    )
+    return shared, shared
 
 
 def class_names_from_manifest(manifest: Path) -> list[str]:

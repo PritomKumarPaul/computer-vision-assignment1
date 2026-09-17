@@ -53,6 +53,12 @@ def main() -> None:
     print(f"{args.split} loss: {metrics['loss']:.4f}")
     print(f"{args.split} accuracy: {metrics['accuracy']:.4f}")
     print(f"{args.split} macro-F1: {metrics['macro_f1']:.4f}")
+    print(
+        f"{args.split} time: {metrics['elapsed_seconds']:.3f}s | "
+        f"throughput: {metrics['images_per_second']:.1f} images/s"
+    )
+    if metrics["peak_gpu_memory_mib"] is not None:
+        print(f"Peak GPU memory: {metrics['peak_gpu_memory_mib']:.1f} MiB")
     for name, recall in metrics["per_class_recall"].items():
         print(f"  {name:14s} recall={recall:.4f}")
 

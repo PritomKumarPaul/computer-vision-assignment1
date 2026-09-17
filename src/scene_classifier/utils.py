@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import json
 import os
+import platform
 import random
+import sys
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
+import torchvision
 
 
 def set_seed(seed: int) -> None:
@@ -50,9 +53,16 @@ def write_json(path: str | Path, payload: Any) -> None:
 
 def environment_summary() -> dict[str, Any]:
     return {
+        "python": sys.version,
+        "platform": platform.platform(),
         "python_hash_seed": os.environ.get("PYTHONHASHSEED"),
         "torch": torch.__version__,
+        "torchvision": torchvision.__version__,
         "cuda_available": torch.cuda.is_available(),
         "cuda_version": torch.version.cuda,
         "cudnn_version": torch.backends.cudnn.version() if torch.backends.cudnn.is_available() else None,
+        "cuda_device_count": torch.cuda.device_count(),
+        "cuda_device_name": (
+            torch.cuda.get_device_name(0) if torch.cuda.is_available() else None
+        ),
     }
