@@ -90,6 +90,41 @@ python evaluate.py \
   --device cuda
 ```
 
+## Finalize a numbered experimental milestone
+
+After training and validation, generate the loss/accuracy diagrams and a
+versioned result package:
+
+```bash
+python scripts/finalize_checkpoint.py \
+  --run-dir artifacts/runs/starter_cnn \
+  --name checkpoint1
+```
+
+This produces:
+
+```text
+artifacts/checkpoints/checkpoint1.pt       # local; ignored by Git
+results/checkpoint1/history.csv
+results/checkpoint1/summary.json
+results/checkpoint1/validation_metrics.json
+reports/figures/checkpoint1/loss_curve.png
+reports/figures/checkpoint1/accuracy_curve.png
+```
+
+Then record the completed experiment:
+
+```bash
+git add results/experiments.csv results/checkpoint1 reports/figures/checkpoint1
+git commit -m "checkpoint1: starter CNN experiment"
+git tag checkpoint1
+```
+
+For the next experiment, use `--run-name checkpoint2` during training, evaluate
+its best checkpoint, finalize it with `--name checkpoint2`, and then commit/tag
+that complete evidence package. Continue the same numbering without reusing a
+checkpoint name.
+
 Do not use the labeled test set to choose architectures or hyperparameters.
 After the final model has been selected using validation evidence, test it once:
 

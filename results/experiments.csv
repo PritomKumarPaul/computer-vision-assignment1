@@ -1,0 +1,2 @@
+run_name,model,seed,device,image_size,batch_size,best_epoch,best_val_accuracy,elapsed_seconds,parameters,trainable_parameters,model_size_mib,macs_per_image,flops_per_image,average_epoch_seconds,peak_gpu_memory_mib
+starter_cnn,starter_cnn,0,cuda,64,64,10,0.46041666666666664,36.113,57776,57776,0.220398,611136,1222272,1.803,66.3623046875
