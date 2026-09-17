@@ -7,6 +7,7 @@ data:
   val_manifest: splits/val.csv
   image_size: 128
   channels: 3
+  color_mode: rgb
   transform: basic_augmentation
   batch_size: 64
   num_workers: 2

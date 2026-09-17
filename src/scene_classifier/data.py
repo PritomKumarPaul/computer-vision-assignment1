@@ -47,6 +47,9 @@ class ManifestDataset(Dataset):
 def build_transforms(data_config: dict):
     profile = data_config["transform"]
     size = int(data_config["image_size"])
+    color_mode = data_config.get("color_mode", "rgb")
+    if color_mode not in {"rgb", "grayscale"}:
+        raise ValueError(f"color_mode must be 'rgb' or 'grayscale'; got {color_mode}")
 
     if profile == "baseline":
         shared = transforms.Compose(
@@ -60,8 +63,13 @@ def build_transforms(data_config: dict):
         return shared, shared
 
     if profile == "basic_augmentation":
+        color_transform = (
+            [transforms.Grayscale(num_output_channels=3)]
+            if color_mode == "grayscale" else []
+        )
         train_transform = transforms.Compose(
             [
+                *color_transform,
                 transforms.RandomResizedCrop(
                     size, scale=(0.80, 1.0), ratio=(0.85, 1.15),
                     interpolation=InterpolationMode.BILINEAR,
@@ -73,6 +81,7 @@ def build_transforms(data_config: dict):
         )
         eval_transform = transforms.Compose(
             [
+                *color_transform,
                 transforms.Resize(size + 16, interpolation=InterpolationMode.BILINEAR),
                 transforms.CenterCrop(size),
                 transforms.ToTensor(),
@@ -82,8 +91,13 @@ def build_transforms(data_config: dict):
         return train_transform, eval_transform
 
     if profile == "imagenet_augmentation":
+        color_transform = (
+            [transforms.Grayscale(num_output_channels=3)]
+            if color_mode == "grayscale" else []
+        )
         train_transform = transforms.Compose(
             [
+                *color_transform,
                 transforms.RandomResizedCrop(
                     size, scale=(0.70, 1.0), ratio=(0.80, 1.25),
                     interpolation=InterpolationMode.BILINEAR,
@@ -95,6 +109,7 @@ def build_transforms(data_config: dict):
         )
         eval_transform = transforms.Compose(
             [
+                *color_transform,
                 transforms.Resize(256, interpolation=InterpolationMode.BILINEAR),
                 transforms.CenterCrop(size),
                 transforms.ToTensor(),

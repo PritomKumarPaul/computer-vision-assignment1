@@ -56,9 +56,13 @@ def append_experiment(path: Path, row: dict) -> None:
         writer.writerow(row)
 
 
-def main() -> None:
+def main(default_config: Path | None = None) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument(
+        "--config", type=Path, default=default_config,
+        required=default_config is None,
+    )
+    parser.add_argument("--run-name", help="Override run_name without editing the YAML file.")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument(
         "--num-workers", type=int,
@@ -69,6 +73,8 @@ def main() -> None:
 
     project_root = args.project_root.resolve()
     config = load_config(args.config)
+    if args.run_name:
+        config["run_name"] = args.run_name
     if args.num_workers is not None:
         config["data"]["num_workers"] = args.num_workers
     set_seed(int(config["seed"]))

@@ -16,37 +16,51 @@ data/
   test2/*.jpg                 # unlabeled; not used unless its role is clarified
 ```
 
-## Setup
+## Setup (`vlm_clean`)
 
-Python 3.10+ is recommended.
+Activate the existing environment and install only missing dependencies:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+conda activate vlm_clean
+cd "/home/ppaul11/computer vision/assignment1/assignment1"
+python -m pip install -r requirements.txt
 ```
 
-The current cluster environment already provides the main dependencies. CUDA
-is optional; every command also supports CPU execution.
+Every training and evaluation entry point accepts `--device auto`, `cuda`, or
+`cpu`. `auto` uses CUDA when PyTorch can see a GPU and otherwise uses CPU.
 
 ## Reproducible data split
 
 Create the fixed 80/20 training/validation manifests before training:
 
 ```bash
+python scripts/audit_dataset.py --data-root data
 python scripts/create_split.py --data-root data/train --output-dir splits --seed 0
 ```
 
 The split is stratified to exactly 120 training and 30 validation images per
-class. Exact duplicate files are grouped so they cannot cross the split.
+class. Exact duplicate files are grouped so they cannot cross the split. The
+labeled test directory never participates in splitting or model selection.
+
+The source files are mixed-mode: 2,250 training images are stored as grayscale
+(`L`) and all 150 `Flower` images are stored as RGB. The baseline deliberately
+converts every image to one grayscale channel, matching the starter notebook.
+The second baseline and final candidate convert every input to RGB: native
+grayscale images become three identical channels while native RGB images keep
+their color. The `color_mode` config field makes a grayscale/RGB ablation
+possible without changing model code.
 
 ## Train
 
 ```bash
-python train.py --config configs/baseline_tnet.yaml
-python train.py --config configs/small_cnn.yaml
-python train.py --config configs/resnet18.yaml
+python train_baseline1.py --device cuda
+python train_baseline2.py --device cuda
+python train_final.py --device cuda
 ```
+
+Equivalent CPU commands use `--device cpu`. The three entry points share the
+same tested training engine, while their YAML files independently record model,
+preprocessing, optimizer, and schedule choices.
 
 If worker processes are unavailable in a restricted shell, add
 `--num-workers 0`. This changes input-loading performance, not the experiment.
@@ -64,6 +78,9 @@ python evaluate.py \
   --checkpoint artifacts/runs/baseline_tnet/best.pt \
   --split val
 ```
+
+For the other checkpoints, replace `baseline_tnet` with `small_cnn` or
+`resnet18`.
 
 The labeled test set must not guide model selection. Test evaluation therefore
 requires an explicit acknowledgement:
@@ -99,3 +116,11 @@ purpose.
 
 The supplied notebook is preserved unchanged at
 `notebooks/starter_original.ipynb`.
+
+## Git workflow
+
+Commit logical milestones rather than every epoch: repository scaffold,
+baseline implementation, each meaningful completed experiment, final model,
+and report/reproducibility cleanup. The handout explicitly requires meaningful
+history and says not to create the entire repository as one last-minute commit,
+so pushing one combined snapshot at the end is not recommended.
