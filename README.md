@@ -183,3 +183,42 @@ python scripts/finalize_checkpoint.py \
   --run-dir artifacts/runs/checkpoint2 \
   --name checkpoint2
 ```
+
+## Checkpoint 3 architecture suite
+
+Checkpoint 3 compares five torchvision CNN families under the same 128x128
+RGB pipeline, split, augmentations, optimizer, regularization, scheduler, and
+50-epoch maximum budget:
+
+- DenseNet-121;
+- EfficientNet-B0;
+- MobileNetV3-Large;
+- ResNeXt-50 32x4d; and
+- ConvNeXt-Tiny.
+
+All are initialized from scratch so this checkpoint focuses on architecture.
+The comparison also includes checkpoint 2's ResNet-18 result as a reference.
+VGG is excluded because its roughly 130M parameters are far outside this group;
+Inception uses a materially different input/training design; and Xception would
+require an additional non-torchvision implementation.
+
+Run the full suite sequentially on one GPU:
+
+```bash
+bash scripts/run_checkpoint3_suite.sh cuda
+```
+
+The script is resumable: completed training, validation, and finalization
+stages are skipped. A failure in one architecture is logged and does not erase
+other completed runs. Logs are saved under `artifacts/logs/checkpoint3/`.
+
+After all runs, inspect:
+
+```text
+results/checkpoint3/comparison.csv
+results/checkpoint3/comparison.md
+reports/figures/checkpoint3/architecture_comparison.png
+```
+
+The suite deliberately does not commit, tag, or push. After reviewing the
+comparison, checkpoint 3 can be recorded as one Git milestone.

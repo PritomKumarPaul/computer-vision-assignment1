@@ -19,6 +19,7 @@ from matplotlib.ticker import PercentFormatter
 
 
 CHECKPOINT_NAME = re.compile(r"checkpoint[1-9][0-9]*$")
+VARIANT_NAME = re.compile(r"[a-z0-9][a-z0-9_]*$")
 
 
 def read_json(path: Path):
@@ -90,12 +91,18 @@ def main() -> None:
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--name", required=True, help="Numbered label such as checkpoint1")
     parser.add_argument(
+        "--variant",
+        help="Optional suite member such as densenet121; stored beneath the checkpoint name.",
+    )
+    parser.add_argument(
         "--project-root", type=Path, default=Path(__file__).resolve().parents[1]
     )
     args = parser.parse_args()
 
     if not CHECKPOINT_NAME.fullmatch(args.name):
         raise SystemExit("--name must be checkpoint1, checkpoint2, ...")
+    if args.variant and not VARIANT_NAME.fullmatch(args.variant):
+        raise SystemExit("--variant may contain lowercase letters, numbers, and underscores")
 
     project_root = args.project_root.resolve()
     run_dir = args.run_dir.resolve()
@@ -123,14 +130,18 @@ def main() -> None:
 
     best_row = max(history, key=lambda row: row["val_accuracy"])
     best_epoch = int(best_row["epoch"])
+    artifact_name = args.name if not args.variant else f"{args.name}_{args.variant}"
     result_dir = project_root / "results" / args.name
     figure_dir = project_root / "reports" / "figures" / args.name
+    if args.variant:
+        result_dir = result_dir / args.variant
+        figure_dir = figure_dir / args.variant
     checkpoint_dir = project_root / "artifacts" / "checkpoints"
     result_dir.mkdir(parents=True, exist_ok=True)
     figure_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-    local_checkpoint = checkpoint_dir / f"{args.name}.pt"
+    local_checkpoint = checkpoint_dir / f"{artifact_name}.pt"
     shutil.copy2(required["checkpoint"], local_checkpoint)
     save_history_csv(result_dir / "history.csv", history)
     shutil.copy2(required["validation"], result_dir / "validation_metrics.json")
@@ -138,17 +149,18 @@ def main() -> None:
         figure_dir / "loss_curve.png",
         history,
         best_epoch,
-        f"{args.name}: Training and validation loss",
+        f"{artifact_name}: Training and validation loss",
     )
     save_accuracy_plot(
         figure_dir / "accuracy_curve.png",
         history,
         best_epoch,
-        f"{args.name}: Training and validation accuracy",
+        f"{artifact_name}: Training and validation accuracy",
     )
 
     summary = {
         "checkpoint_name": args.name,
+        "variant": args.variant,
         "source_run": metadata["config"]["run_name"],
         "checkpoint_path": str(local_checkpoint.relative_to(project_root)),
         "checkpoint_sha256": file_sha256(local_checkpoint),
@@ -164,7 +176,7 @@ def main() -> None:
     }
     write_json(result_dir / "summary.json", summary)
 
-    print(f"Finalized {args.name}")
+    print(f"Finalized {artifact_name}")
     print(f"  summary: {result_dir / 'summary.json'}")
     print(f"  loss graph: {figure_dir / 'loss_curve.png'}")
     print(f"  accuracy graph: {figure_dir / 'accuracy_curve.png'}")

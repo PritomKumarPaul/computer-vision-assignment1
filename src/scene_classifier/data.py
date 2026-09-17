@@ -55,7 +55,7 @@ def build_transforms(data_config: dict):
         )
         return shared, shared
 
-    if profile == "resnet_regularized" and color_mode == "rgb":
+    if profile in {"resnet_regularized", "rgb_regularized"} and color_mode == "rgb":
         train_transform = transforms.Compose(
             [
                 transforms.RandomResizedCrop(

@@ -147,6 +147,7 @@ def main(default_config: Path | None = None) -> None:
             default=0.0,
         ),
     }
+    write_json(run_dir / "completed.json", result)
     append_experiment(project_root / "results" / "experiments.csv", result)
     print(f"Best validation accuracy: {best_accuracy:.4f} at epoch {best_epoch}")
     print(f"Total training time: {elapsed:.1f}s ({elapsed / 60:.2f} min)")
