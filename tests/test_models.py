@@ -69,6 +69,65 @@ class ModelShapeTests(unittest.TestCase):
                 self.assertEqual(actual_groups, expected_groups)
                 self.assertEqual(model.fc[-1].out_features, 16)
 
+    def test_checkpoint5_partial_and_head_only_scopes(self):
+        cases = [
+            (
+                "resnet18_transfer", "IMAGENET1K_V1", "layer1", "layer4",
+                {"fc.1.weight", "fc.1.bias"},
+            ),
+            (
+                "densenet121_transfer", "IMAGENET1K_V1",
+                "features.denseblock1", "features.denseblock4",
+                {"classifier.1.weight", "classifier.1.bias"},
+            ),
+            (
+                "efficientnet_b0_transfer", "IMAGENET1K_V1", "features.1",
+                "features.7", {"classifier.1.weight", "classifier.1.bias"},
+            ),
+            (
+                "convnext_tiny_transfer", "IMAGENET1K_V1", "features.1",
+                "features.7", {"classifier.2.1.weight", "classifier.2.1.bias"},
+            ),
+        ]
+        for name, weights, early_module, final_stage, head_parameters in cases:
+            with self.subTest(name=name, scope="last_stage_and_head"):
+                model = build_model(
+                    {
+                        "name": name,
+                        "pretrained": True,
+                        "weights": weights,
+                        "trainable_scope": "last_stage_and_head",
+                        "dropout": 0.3,
+                    },
+                    num_classes=16,
+                    load_pretrained=False,
+                )
+                self.assertFalse(
+                    next(model.get_submodule(early_module).parameters()).requires_grad
+                )
+                self.assertTrue(
+                    next(model.get_submodule(final_stage).parameters()).requires_grad
+                )
+
+            with self.subTest(name=name, scope="head_only"):
+                model = build_model(
+                    {
+                        "name": name,
+                        "pretrained": True,
+                        "weights": weights,
+                        "trainable_scope": "head_only",
+                        "dropout": 0.3,
+                    },
+                    num_classes=16,
+                    load_pretrained=False,
+                )
+                actual = {
+                    parameter_name
+                    for parameter_name, parameter in model.named_parameters()
+                    if parameter.requires_grad
+                }
+                self.assertEqual(actual, head_parameters)
+
 
 if __name__ == "__main__":
     unittest.main()

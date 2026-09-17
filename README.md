@@ -266,3 +266,50 @@ reports/figures/checkpoint4/transfer_comparison.png
 reports/figures/checkpoint4/<variant>/loss_curve.png
 reports/figures/checkpoint4/<variant>/accuracy_curve.png
 ```
+
+## Checkpoint 5 multi-architecture transfer matrix
+
+Checkpoint 5 applies the same four transfer-learning strategies to four more
+architectures:
+
+- ResNet-18;
+- DenseNet-121;
+- EfficientNet-B0; and
+- ConvNeXt-Tiny.
+
+For each architecture, the suite runs scratch/all layers, pretrained/all
+layers, pretrained/final stage plus classifier, and pretrained/classifier-only
+training. The architecture-specific final stages are:
+
+- ResNet-18: `layer4`;
+- DenseNet-121: `denseblock4` plus `norm5`;
+- EfficientNet-B0: the last MBConv stage and final convolution; and
+- ConvNeXt-Tiny: the last ConvNeXt stage.
+
+The 16 new runs use the same 224x224 ImageNet-normalized data pipeline and
+optimization policy as checkpoint 4. The final comparison also incorporates
+the four directly comparable checkpoint-4 ResNeXt-50 results as references;
+it does not retrain ResNeXt.
+
+Run the complete matrix sequentially on one GPU:
+
+```bash
+conda activate vlm_clean
+cd "/home/ppaul11/computer vision/assignment1/assignment1"
+bash scripts/run_checkpoint5_transfer_matrix.sh cuda
+```
+
+The first pretrained run for each architecture downloads its official
+torchvision `IMAGENET1K_V1` weights if they are not already cached. Subsequent
+setups reuse the cache. The runner is resumable and continues to the next setup
+if one run fails. It performs no test-set evaluation or Git operation.
+
+After completion, inspect:
+
+```text
+results/checkpoint5/comparison.csv
+results/checkpoint5/comparison.md
+reports/figures/checkpoint5/transfer_matrix.png
+reports/figures/checkpoint5/<architecture>_<setup>/loss_curve.png
+reports/figures/checkpoint5/<architecture>_<setup>/accuracy_curve.png
+```

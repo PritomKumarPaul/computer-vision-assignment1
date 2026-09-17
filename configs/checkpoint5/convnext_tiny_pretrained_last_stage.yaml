@@ -1,0 +1,27 @@
+run_name: checkpoint5_convnext_tiny_pretrained_last_stage
+seed: 0
+data:
+  root: data
+  train_manifest: splits/train.csv
+  val_manifest: splits/val.csv
+  image_size: 224
+  channels: 3
+  color_mode: rgb
+  transform: imagenet_regularized
+  batch_size: 32
+  num_workers: 2
+model:
+  name: convnext_tiny_transfer
+  pretrained: true
+  weights: IMAGENET1K_V1
+  trainable_scope: last_stage_and_head
+  dropout: 0.3
+training:
+  epochs: 50
+  optimizer: adamw
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  scheduler: cosine
+  label_smoothing: 0.1
+  early_stopping_patience: 10
+  amp: true
