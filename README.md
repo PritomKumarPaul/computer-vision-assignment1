@@ -146,3 +146,40 @@ commit.
 
 The supplied notebook is preserved unchanged at
 `notebooks/starter_original.ipynb`.
+
+## Checkpoint 2 hypothesis
+
+Checkpoint 1 strongly overfit, so checkpoint 2 tests a deliberately combined
+anti-overfitting recipe:
+
+- RGB rather than forced grayscale input;
+- ResNet-18 initialized from scratch;
+- random resized crops, horizontal flips, mild brightness/contrast jitter, and
+  random erasing;
+- dropout, AdamW weight decay, and label smoothing;
+- cosine learning-rate decay and validation-based early stopping; and
+- 128x128 inputs with mixed precision on CUDA.
+
+Because this changes several factors together, it tests whether the recipe as a
+whole is useful; it does not establish which component caused any improvement.
+A later ablation can isolate the most important factor.
+
+Train and validate it with:
+
+```bash
+python train_checkpoint2.py --device cuda
+
+python evaluate.py \
+  --checkpoint artifacts/runs/checkpoint2/best.pt \
+  --split val \
+  --device cuda
+```
+
+After validation, package the evidence but do not commit until the diagrams
+have been inspected:
+
+```bash
+python scripts/finalize_checkpoint.py \
+  --run-dir artifacts/runs/checkpoint2 \
+  --name checkpoint2
+```

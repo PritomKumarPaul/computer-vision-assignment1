@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import torch
 from torch import nn
+from torchvision.models import resnet18
 
 
 class StarterCNN(nn.Module):
@@ -28,4 +29,17 @@ def build_model(model_config: dict, num_classes: int, load_pretrained: bool | No
     name = model_config["name"]
     if name == "starter_cnn":
         return StarterCNN(num_classes=num_classes)
+    if name == "resnet18_scratch":
+        if bool(model_config.get("pretrained", False)):
+            raise ValueError(
+                "checkpoint2 is intentionally trained from scratch; "
+                "set pretrained: false"
+            )
+        model = resnet18(weights=None)
+        in_features = model.fc.in_features
+        model.fc = nn.Sequential(
+            nn.Dropout(float(model_config.get("dropout", 0.3))),
+            nn.Linear(in_features, num_classes),
+        )
+        return model
     raise ValueError(f"Unknown model: {name}")

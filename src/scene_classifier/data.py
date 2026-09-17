@@ -44,21 +44,49 @@ def build_transforms(data_config: dict):
     profile = data_config["transform"]
     size = int(data_config["image_size"])
     color_mode = data_config.get("color_mode", "grayscale")
-    if profile != "starter" or color_mode != "grayscale":
-        raise ValueError(
-            "The current experiment expects transform='starter' and "
-            "color_mode='grayscale'. Add later transforms only after forming "
-            "and documenting the next experimental hypothesis."
+    if profile == "starter" and color_mode == "grayscale":
+        shared = transforms.Compose(
+            [
+                transforms.Grayscale(num_output_channels=1),
+                transforms.Resize((size, size), interpolation=InterpolationMode.BILINEAR),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5], std=[0.5]),
+            ]
         )
-    shared = transforms.Compose(
-        [
-            transforms.Grayscale(num_output_channels=1),
-            transforms.Resize((size, size), interpolation=InterpolationMode.BILINEAR),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5], std=[0.5]),
-        ]
+        return shared, shared
+
+    if profile == "resnet_regularized" and color_mode == "rgb":
+        train_transform = transforms.Compose(
+            [
+                transforms.RandomResizedCrop(
+                    size,
+                    scale=(0.75, 1.0),
+                    ratio=(0.80, 1.25),
+                    interpolation=InterpolationMode.BILINEAR,
+                ),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.ColorJitter(brightness=0.15, contrast=0.15),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5] * 3, std=[0.5] * 3),
+                transforms.RandomErasing(
+                    p=0.20, scale=(0.02, 0.12), ratio=(0.5, 2.0), value="random"
+                ),
+            ]
+        )
+        eval_transform = transforms.Compose(
+            [
+                transforms.Resize(size + 16, interpolation=InterpolationMode.BILINEAR),
+                transforms.CenterCrop(size),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5] * 3, std=[0.5] * 3),
+            ]
+        )
+        return train_transform, eval_transform
+
+    raise ValueError(
+        f"Unsupported transform/color combination: profile={profile!r}, "
+        f"color_mode={color_mode!r}"
     )
-    return shared, shared
 
 
 def class_names_from_manifest(manifest: Path) -> list[str]:

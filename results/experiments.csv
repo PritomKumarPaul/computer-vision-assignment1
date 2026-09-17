@@ -1,2 +1,3 @@
 run_name,model,seed,device,image_size,batch_size,best_epoch,best_val_accuracy,elapsed_seconds,parameters,trainable_parameters,model_size_mib,macs_per_image,flops_per_image,average_epoch_seconds,peak_gpu_memory_mib
 starter_cnn,starter_cnn,0,cuda,64,64,10,0.46041666666666664,36.113,57776,57776,0.220398,611136,1222272,1.803,66.3623046875
+checkpoint2,resnet18_scratch,0,cuda,128,64,49,0.7645833333333333,195.988,11184720,11184720,42.703094,592191488,1184382976,3.212,488.02587890625
