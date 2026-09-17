@@ -1,0 +1,2 @@
+run_name,model,seed,best_epoch,best_val_accuracy,elapsed_seconds,parameters
+baseline_tnet,tnet,0,6,0.46041666666666664,48.214,57776

@@ -50,7 +50,7 @@ def append_experiment(path: Path, row: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     exists = path.exists()
     with path.open("a", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(row))
+        writer = csv.DictWriter(handle, fieldnames=list(row), lineterminator="\n")
         if not exists:
             writer.writeheader()
         writer.writerow(row)
