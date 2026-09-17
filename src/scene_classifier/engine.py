@@ -97,6 +97,8 @@ def train_one_epoch(
     progress_desc: str,
 ):
     model.train()
+    for module_name in getattr(model, "_frozen_module_names", ()):
+        model.get_submodule(module_name).eval()
     running_loss = 0.0
     correct = 0
     total = 0

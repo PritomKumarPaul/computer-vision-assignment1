@@ -3,6 +3,7 @@ from __future__ import annotations
 import torch
 from torch import nn
 from torchvision.models import (
+    ResNeXt50_32X4D_Weights,
     convnext_tiny,
     densenet121,
     efficientnet_b0,
@@ -10,6 +11,40 @@ from torchvision.models import (
     resnet18,
     resnext50_32x4d,
 )
+
+
+RESNEXT_SCOPES = {"all", "layer4_and_head", "head_only"}
+
+
+def _configure_resnext_trainable_scope(model: nn.Module, scope: str) -> None:
+    """Freeze the requested ResNeXt blocks and record modules kept in eval mode."""
+    if scope not in RESNEXT_SCOPES:
+        raise ValueError(
+            f"Unknown ResNeXt trainable_scope: {scope!r}; "
+            f"expected one of {sorted(RESNEXT_SCOPES)}"
+        )
+
+    for parameter in model.parameters():
+        parameter.requires_grad = scope == "all"
+
+    frozen_modules: tuple[str, ...] = ()
+    if scope == "layer4_and_head":
+        for parameter in model.layer4.parameters():
+            parameter.requires_grad = True
+        for parameter in model.fc.parameters():
+            parameter.requires_grad = True
+        frozen_modules = ("conv1", "bn1", "relu", "maxpool", "layer1", "layer2", "layer3")
+    elif scope == "head_only":
+        for parameter in model.fc.parameters():
+            parameter.requires_grad = True
+        frozen_modules = (
+            "conv1", "bn1", "relu", "maxpool", "layer1", "layer2", "layer3",
+            "layer4", "avgpool",
+        )
+
+    # engine.train_one_epoch uses these names to prevent frozen BatchNorm
+    # running statistics from changing after model.train() is called.
+    model._frozen_module_names = frozen_modules
 
 
 class StarterCNN(nn.Module):
@@ -32,7 +67,6 @@ class StarterCNN(nn.Module):
 
 
 def build_model(model_config: dict, num_classes: int, load_pretrained: bool | None = None):
-    del load_pretrained
     name = model_config["name"]
     if name == "starter_cnn":
         return StarterCNN(num_classes=num_classes)
@@ -88,5 +122,31 @@ def build_model(model_config: dict, num_classes: int, load_pretrained: bool | No
             model.classifier[-1] = nn.Sequential(
                 nn.Dropout(dropout), nn.Linear(in_features, num_classes)
             )
+        return model
+    if name == "resnext50_32x4d_transfer":
+        pretrained_requested = bool(model_config.get("pretrained", False))
+        should_load_pretrained = (
+            pretrained_requested
+            if load_pretrained is None
+            else pretrained_requested and load_pretrained
+        )
+        weights_name = model_config.get("weights", "IMAGENET1K_V2")
+        if weights_name != "IMAGENET1K_V2":
+            raise ValueError(
+                "resnext50_32x4d_transfer currently supports weights: IMAGENET1K_V2"
+            )
+        weights = (
+            ResNeXt50_32X4D_Weights.IMAGENET1K_V2
+            if should_load_pretrained
+            else None
+        )
+        model = resnext50_32x4d(weights=weights)
+        model.fc = nn.Sequential(
+            nn.Dropout(float(model_config.get("dropout", 0.3))),
+            nn.Linear(model.fc.in_features, num_classes),
+        )
+        _configure_resnext_trainable_scope(
+            model, model_config.get("trainable_scope", "all")
+        )
         return model
     raise ValueError(f"Unknown model: {name}")

@@ -222,3 +222,47 @@ reports/figures/checkpoint3/architecture_comparison.png
 
 The suite deliberately does not commit, tag, or push. After reviewing the
 comparison, checkpoint 3 can be recorded as one Git milestone.
+
+## Checkpoint 4 ResNeXt transfer-learning suite
+
+Checkpoint 4 holds the architecture fixed at ResNeXt-50 32x4d and compares
+four initialization/freezing strategies:
+
+1. random initialization with every layer trainable;
+2. ImageNet-pretrained initialization with every layer fine-tuned;
+3. ImageNet-pretrained initialization with only `layer4` and the classifier
+   trainable; and
+4. ImageNet-pretrained initialization with the complete convolutional
+   backbone frozen and only the classifier trainable.
+
+All variants use the same leakage-controlled split, RGB augmentation, 224x224
+input size, ImageNet normalization, batch size, seed, regularization, scheduler,
+and 50-epoch maximum budget. Learning rates differ by trainable scope: `1e-3`
+for scratch and head-only training, `3e-4` for last-stage fine-tuning, and
+`1e-4` for full fine-tuning. Frozen modules, including their batch-normalization
+statistics, remain in evaluation mode during training.
+
+The first pretrained run automatically downloads torchvision's
+`IMAGENET1K_V2` weights if they are not already cached. Run all four setups
+sequentially on one GPU with:
+
+```bash
+conda activate vlm_clean
+cd "/home/ppaul11/computer vision/assignment1/assignment1"
+bash scripts/run_checkpoint4_transfer_suite.sh cuda
+```
+
+The runner is resumable and writes separate logs beneath
+`artifacts/logs/checkpoint4/`. It trains, validates, generates each setup's
+loss/accuracy curves, and creates the final transfer-learning comparison. It
+does not evaluate the test set or perform any Git operation.
+
+After it finishes, inspect:
+
+```text
+results/checkpoint4/comparison.csv
+results/checkpoint4/comparison.md
+reports/figures/checkpoint4/transfer_comparison.png
+reports/figures/checkpoint4/<variant>/loss_curve.png
+reports/figures/checkpoint4/<variant>/accuracy_curve.png
+```

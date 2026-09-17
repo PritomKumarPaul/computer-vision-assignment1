@@ -23,16 +23,21 @@ from src.scene_classifier.utils import (
 
 def build_optimizer(model, training: dict):
     name = training["optimizer"].lower()
+    trainable_parameters = [
+        parameter for parameter in model.parameters() if parameter.requires_grad
+    ]
+    if not trainable_parameters:
+        raise ValueError("The model has no trainable parameters.")
     kwargs = {
         "lr": float(training["learning_rate"]),
         "weight_decay": float(training.get("weight_decay", 0.0)),
     }
     if name == "adam":
-        return torch.optim.Adam(model.parameters(), **kwargs)
+        return torch.optim.Adam(trainable_parameters, **kwargs)
     if name == "adamw":
-        return torch.optim.AdamW(model.parameters(), **kwargs)
+        return torch.optim.AdamW(trainable_parameters, **kwargs)
     if name == "sgd":
-        return torch.optim.SGD(model.parameters(), momentum=0.9, **kwargs)
+        return torch.optim.SGD(trainable_parameters, momentum=0.9, **kwargs)
     raise ValueError(f"Unknown optimizer: {name}")
 
 
@@ -107,6 +112,7 @@ def main(default_config: Path | None = None) -> None:
     print(f"Run: {config['run_name']} | device: {device}")
     print(
         f"Complexity: {complexity['total_parameters']:,} parameters | "
+        f"{complexity['trainable_parameters']:,} trainable | "
         f"{complexity['parameter_and_buffer_size_mib']:.3f} MiB parameter storage | "
         f"{complexity['estimated_macs_per_image'] / 1e6:.3f} M MACs/image | "
         f"{complexity['estimated_flops_per_image'] / 1e6:.3f} M FLOPs/image"

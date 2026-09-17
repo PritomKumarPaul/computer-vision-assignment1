@@ -55,7 +55,17 @@ def build_transforms(data_config: dict):
         )
         return shared, shared
 
-    if profile in {"resnet_regularized", "rgb_regularized"} and color_mode == "rgb":
+    if profile in {
+        "resnet_regularized",
+        "rgb_regularized",
+        "imagenet_regularized",
+    } and color_mode == "rgb":
+        if profile == "imagenet_regularized":
+            normalize_mean = [0.485, 0.456, 0.406]
+            normalize_std = [0.229, 0.224, 0.225]
+        else:
+            normalize_mean = [0.5] * 3
+            normalize_std = [0.5] * 3
         train_transform = transforms.Compose(
             [
                 transforms.RandomResizedCrop(
@@ -67,7 +77,7 @@ def build_transforms(data_config: dict):
                 transforms.RandomHorizontalFlip(p=0.5),
                 transforms.ColorJitter(brightness=0.15, contrast=0.15),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5] * 3, std=[0.5] * 3),
+                transforms.Normalize(mean=normalize_mean, std=normalize_std),
                 transforms.RandomErasing(
                     p=0.20, scale=(0.02, 0.12), ratio=(0.5, 2.0), value="random"
                 ),
@@ -78,7 +88,7 @@ def build_transforms(data_config: dict):
                 transforms.Resize(size + 16, interpolation=InterpolationMode.BILINEAR),
                 transforms.CenterCrop(size),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5] * 3, std=[0.5] * 3),
+                transforms.Normalize(mean=normalize_mean, std=normalize_std),
             ]
         )
         return train_transform, eval_transform

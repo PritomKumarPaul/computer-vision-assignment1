@@ -1,0 +1,5 @@
+variant,label,pretrained,trainable_scope,learning_rate,best_epoch,validation_accuracy,validation_macro_f1,total_parameters,trainable_parameters,trainable_fraction,macs_per_image,training_seconds,peak_gpu_memory_mib
+pretrained_all,Pretrained: all layers,True,all,0.0001,8,0.94375,0.9437652354854342,23012688,23012688,1.0,4228464640,128.24014036287554,2208.87744140625
+pretrained_head_only,Pretrained: head only,True,head_only,0.001,11,0.9416666666666667,0.9417482587613626,23012688,32784,0.001424605417672199,4228464640,138.3952408109326,387.3125
+pretrained_last_stage,Pretrained: layer4 + head,True,layer4_and_head,0.0003,15,0.9479166666666666,0.9476007427586659,23012688,14577680,0.6334627228249042,4228464640,152.5543225519359,501.09375
+scratch_all,Scratch: all layers,False,all,0.001,44,0.825,0.8221517385444607,23012688,23012688,1.0,4228464640,343.93529302300885,2206.62744140625

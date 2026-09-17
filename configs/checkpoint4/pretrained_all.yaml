@@ -1,0 +1,30 @@
+run_name: checkpoint4_resnext_pretrained_all
+seed: 0
+
+data:
+  root: data
+  train_manifest: splits/train.csv
+  val_manifest: splits/val.csv
+  image_size: 224
+  channels: 3
+  color_mode: rgb
+  transform: imagenet_regularized
+  batch_size: 32
+  num_workers: 2
+
+model:
+  name: resnext50_32x4d_transfer
+  pretrained: true
+  weights: IMAGENET1K_V2
+  trainable_scope: all
+  dropout: 0.3
+
+training:
+  epochs: 50
+  optimizer: adamw
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  scheduler: cosine
+  label_smoothing: 0.1
+  early_stopping_patience: 10
+  amp: true
