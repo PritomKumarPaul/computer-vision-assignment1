@@ -1,0 +1,27 @@
+run_name: baseline_tnet
+seed: 0
+
+data:
+  root: data
+  train_manifest: splits/train.csv
+  val_manifest: splits/val.csv
+  image_size: 64
+  channels: 1
+  transform: baseline
+  batch_size: 64
+  num_workers: 2
+
+model:
+  name: tnet
+  pretrained: false
+
+training:
+  epochs: 20
+  optimizer: adam
+  learning_rate: 0.002
+  weight_decay: 0.0
+  scheduler: none
+  label_smoothing: 0.0
+  early_stopping_patience: null
+  freeze_backbone_epochs: 0
+  amp: false

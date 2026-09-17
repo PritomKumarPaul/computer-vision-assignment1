@@ -1,0 +1,28 @@
+run_name: resnet18
+seed: 0
+
+data:
+  root: data
+  train_manifest: splits/train.csv
+  val_manifest: splits/val.csv
+  image_size: 224
+  channels: 3
+  transform: imagenet_augmentation
+  batch_size: 32
+  num_workers: 2
+
+model:
+  name: resnet18
+  pretrained: true
+  dropout: 0.2
+
+training:
+  epochs: 30
+  optimizer: adamw
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  scheduler: cosine
+  label_smoothing: 0.1
+  early_stopping_patience: 8
+  freeze_backbone_epochs: 3
+  amp: true

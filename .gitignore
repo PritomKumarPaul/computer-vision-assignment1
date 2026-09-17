@@ -1,0 +1,27 @@
+# Course data and original download
+data/
+*.zip
+
+# Generated training artifacts
+artifacts/**
+!artifacts/.gitkeep
+results/*.json
+results/*.png
+results/*.pt
+reports/figures/*.png
+
+# Python and notebooks
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+
+# Editor/OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Supplied handout and duplicate root-level starter notebook
+ITCS_6169_8169_Assignment1.pdf
+ITCS_6169_8169_Assignment1_2026_Starter.ipynb
