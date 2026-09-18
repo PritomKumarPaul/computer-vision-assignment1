@@ -22,7 +22,7 @@ __pycache__/
 .vscode/
 .idea/
 
-# LaTeX build intermediates (the final PDF is tracked)
+# LaTeX build intermediates
 *.aux
 *.log
 *.out

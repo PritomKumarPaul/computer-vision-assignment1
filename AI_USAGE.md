@@ -2,8 +2,8 @@
 
 ## Tool
 
-OpenAI Codex is being used as a pair programmer. The student remains
-responsible for the experimental questions, architecture choices, verification,
+OpenAI Codex was used as a pair-programming assistant. I remained responsible
+for the experimental questions, architecture choices, verification,
 interpretation, and final report.
 
 ## Representative assistance
@@ -18,33 +18,35 @@ interpretation, and final report.
    duplicates together, plus shared training and evaluation utilities.
 4. Codex helped implement reusable experiment runners, progress/timing
    instrumentation, model-freezing policies, result tables, and plotting
-   utilities. The student executed the experiments and interpreted whether
-   each proposed comparison was scientifically useful.
+   utilities. I executed the experiments and interpreted whether each proposed
+   comparison was scientifically useful.
 5. Codex helped organize the final evidence and reproducibility instructions;
-   model selection remained based on the student's validation experiments.
+   I selected the final model using the validation experiments I ran.
 
-## Verification performed by the student
+## Verification I performed
 
-The student reviewed generated code, inspected the saved split and dataset
-audit, ran the training and evaluation commands, checked the learning curves,
-and compared saved metrics before accepting experimental conclusions. Model
-construction and split tests were also used to catch integration errors.
+I reviewed the generated code, inspected the saved split and dataset audit, ran
+the training and evaluation commands, checked the learning curves, and compared
+saved metrics before accepting experimental conclusions. I also used model
+construction and split tests to catch integration errors.
 
 ## Incorrect, ineffective, or questionable suggestion
 
-The shared from-scratch recipe was initially treated as a reasonable way to
-compare MobileNetV3-Large with the other CNN families. MobileNet reached
-66.8% training accuracy but remained at the 6.25% chance level on validation,
-predicting one class for every image. The suggestion was ineffective for this
-architecture. The result was retained and diagnosed rather than discarded;
-later experiments used ImageNet pretraining and architecture-appropriate
-fine-tuning scopes.
+The initial AI-generated training draft focused on loss and accuracy but
+omitted explicit efficiency profiling, even though model scale was part of the
+experimental question. I identified this omission and requested measurements
+for runtime and network complexity. The implementation was revised to record
+total and trainable parameters, parameter storage, estimated MACs/FLOPs,
+epoch/total time, throughput, and peak GPU memory. These measurements were
+important later: they showed that ConvNeXt-Large gained only one validation
+image over ConvNeXt-Tiny while requiring 7.05 times as many parameters and 7.71
+times as many MACs.
 
-## Important student decision
+## Important decisions I made
 
-The student chose the experimental sequence: begin with the supplied CNN,
-respond to its overfitting with RGB augmentation and regularization, compare
-CNN families under one recipe, isolate the effect of pretraining and freezing,
-and finally scale the validation-winning ConvNeXt family. The student also
-decided to stop development after ConvNeXt-Large and preserve the labeled test
-set for a single final evaluation.
+I chose the experimental sequence: begin with the supplied CNN, respond to its
+overfitting with RGB augmentation and regularization, compare CNN families
+under one recipe, isolate the effect of pretraining and freezing, and finally
+scale the validation-winning ConvNeXt family. I also decided to stop development
+after ConvNeXt-Large and preserve the labeled test set for a single final
+evaluation.

@@ -13,7 +13,6 @@ accuracy** (96.28% macro F1) and **98.50% test accuracy** (98.48% macro F1,
 394/400 correct). Twelve of the 16 test classes were classified perfectly;
 `TallBuilding` was the weakest class at 88% recall.
 
-The exact report is available at [`reports/final_report.pdf`](reports/final_report.pdf).
 The selected 749 MiB checkpoint is distributed as a GitHub Release asset rather
 than in Git history:
 
@@ -68,10 +67,15 @@ python scripts/create_split.py --data-root data/train --output-dir splits --seed
 ## Environment
 
 ```bash
+git clone https://github.com/PritomKumarPaul/computer-vision-assignment1.git
+cd computer-vision-assignment1
 conda activate vlm_clean
-cd "/home/ppaul11/computer vision/assignment1/assignment1"
 python -m pip install -r requirements.txt
 ```
+
+The final run recorded Python 3.10.19, PyTorch 2.5.1+cu121, torchvision
+0.20.1+cu121, CUDA 12.1, and an NVIDIA A100-PCIE-40GB. Exact environment
+metadata is saved with each numbered result summary.
 
 Confirm that PyTorch can see the GPU:
 
@@ -171,7 +175,7 @@ python evaluate.py \
 
 Commit logical milestones rather than individual epochs: the starter system,
 its completed result, each later hypothesis and implementation, and the final
-report/reproducibility cleanup. The handout explicitly requires meaningful
+reproducibility cleanup. The handout explicitly requires meaningful
 history and warns against creating the entire repository as one last-minute
 commit.
 
@@ -279,7 +283,7 @@ sequentially on one GPU with:
 
 ```bash
 conda activate vlm_clean
-cd "/home/ppaul11/computer vision/assignment1/assignment1"
+cd computer-vision-assignment1
 bash scripts/run_checkpoint4_transfer_suite.sh cuda
 ```
 
@@ -326,7 +330,7 @@ Run the complete matrix sequentially on one GPU:
 
 ```bash
 conda activate vlm_clean
-cd "/home/ppaul11/computer vision/assignment1/assignment1"
+cd computer-vision-assignment1
 bash scripts/run_checkpoint5_transfer_matrix.sh cuda
 ```
 
@@ -359,7 +363,7 @@ sequentially on one A100 GPU:
 
 ```bash
 conda activate vlm_clean
-cd "/home/ppaul11/computer vision/assignment1/assignment1"
+cd computer-vision-assignment1
 CUDA_VISIBLE_DEVICES=0 bash scripts/run_checkpoint6_convnext_large.sh cuda
 ```
 
