@@ -83,6 +83,17 @@ Confirm that PyTorch can see the GPU:
 python -c "import torch; print(torch.__version__); print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
 ```
 
+## Path handling
+
+Run the documented commands from the repository root. The maintained pipeline
+contains no machine-specific absolute paths: configuration paths are resolved
+relative to the project root, Python entry points infer that root from their
+own file location and accept `--project-root`, and suite shell scripts derive
+it from `BASH_SOURCE` before changing directory. The preserved
+`notebooks/starter_original.ipynb` contains a commented `/content/gdrive/...`
+Colab example from the supplied notebook; it is not imported or used by this
+pipeline.
+
 ## Train the starter CNN
 
 ```bash
