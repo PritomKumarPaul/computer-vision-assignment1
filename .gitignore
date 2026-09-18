@@ -22,6 +22,11 @@ __pycache__/
 .vscode/
 .idea/
 
+# LaTeX build intermediates (the final PDF is tracked)
+*.aux
+*.log
+*.out
+
 # Supplied handout and duplicate root-level starter notebook
 ITCS_6169_8169_Assignment1.pdf
 ITCS_6169_8169_Assignment1_2026_Starter.ipynb

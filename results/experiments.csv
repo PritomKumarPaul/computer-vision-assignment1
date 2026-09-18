@@ -26,3 +26,4 @@ checkpoint5_convnext_tiny_scratch_all,convnext_tiny_transfer,0,cuda,224,32,40,0.
 checkpoint5_convnext_tiny_pretrained_all,convnext_tiny_transfer,0,cuda,224,32,21,0.9604166666666667,191.19,27832432,27832432,106.172302,4454775552,8909551104,5.218,2416.47900390625
 checkpoint5_convnext_tiny_pretrained_last_stage,convnext_tiny_transfer,0,cuda,224,32,8,0.95,102.28,27832432,14303248,106.172302,4454775552,8909551104,4.953,580.490234375
 checkpoint5_convnext_tiny_pretrained_head_only,convnext_tiny_transfer,0,cuda,224,32,15,0.9333333333333333,152.854,27832432,12304,106.172302,4454775552,8909551104,4.831,471.583984375
+checkpoint6_convnext_large_pretrained_all,convnext_large_transfer,0,cuda,224,32,2,0.9625,202.319,196254928,196254928,748.653137,34359922176,68719844352,10.965,9364.5576171875

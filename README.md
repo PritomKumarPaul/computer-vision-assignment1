@@ -1,8 +1,38 @@
 # Assignment 1: The CNN Challenge
 
-This repository currently contains one experiment: the CNN supplied in the
-starter notebook. Later experiments will be introduced only after its measured
-behavior motivates a specific hypothesis.
+This repository contains a leakage-controlled progression from the supplied
+starter CNN to the final ImageNet-pretrained ConvNeXt-Large scene classifier.
+The numbered checkpoints preserve the hypotheses, training evidence, learning
+curves, and comparisons used for model selection.
+
+## Final result
+
+The final model was selected using the fixed validation split before the
+labeled test set was evaluated once. ConvNeXt-Large obtained **96.25% validation
+accuracy** (96.28% macro F1) and **98.50% test accuracy** (98.48% macro F1,
+394/400 correct). Twelve of the 16 test classes were classified perfectly;
+`TallBuilding` was the weakest class at 88% recall.
+
+The exact report is available at [`reports/final_report.pdf`](reports/final_report.pdf).
+The selected 749 MiB checkpoint is distributed as a GitHub Release asset rather
+than in Git history:
+
+- [checkpoint6_convnext_large_pretrained_all.pt](https://github.com/PritomKumarPaul/computer-vision-assignment1/releases/download/checkpoint6/checkpoint6_convnext_large_pretrained_all.pt)
+- SHA-256: `d011ab54be56d0fbb0c643c1f624d935b1521b1c21f2f73f3df5b2f4649f8919`
+
+After downloading the checkpoint to `artifacts/checkpoints/`, reproduce the
+saved validation result with:
+
+```bash
+python evaluate.py \
+  --checkpoint artifacts/checkpoints/checkpoint6_convnext_large_pretrained_all.pt \
+  --split val \
+  --device cuda
+```
+
+The immutable one-time test evidence is stored in
+[`results/final/test_metrics.json`](results/final/test_metrics.json). The guard
+in `scripts/evaluate_final_model.sh` refuses to rerun while that file exists.
 
 ## Data
 
@@ -22,10 +52,11 @@ entirely in validation. The labeled test set is never used for splitting or
 model selection.
 
 The source files are mixed-mode: 2,250 training images are stored as grayscale
-and all 150 `Flower` images are stored as RGB. This first experiment follows the
-starter notebook and converts every input to one-channel grayscale. Whether to
-retain RGB will be treated as a later controlled experiment, not assumed in
-advance.
+and all 150 `Flower` images are stored as RGB. The starter experiment follows
+the notebook and converts every input to one-channel grayscale; all subsequent
+experiments convert inputs to RGB consistently, allowing ImageNet-pretrained
+models to consume the data without making file color mode a class-dependent
+input shape.
 
 The audit and split can be reproduced with:
 
@@ -313,3 +344,40 @@ reports/figures/checkpoint5/transfer_matrix.png
 reports/figures/checkpoint5/<architecture>_<setup>/loss_curve.png
 reports/figures/checkpoint5/<architecture>_<setup>/accuracy_curve.png
 ```
+
+## Checkpoint 6 ConvNeXt capacity scaling
+
+Checkpoint 6 tests one final capacity hypothesis: whether the checkpoint-5
+winner improves when ConvNeXt-Tiny is replaced by ConvNeXt-Large. This is a
+controlled comparison rather than a new recipe. Both models use ImageNet-1K
+initialization, full fine-tuning, 224x224 RGB inputs, batch size 32, AdamW at
+`1e-4`, cosine decay, label smoothing, dropout, the same augmentations, and the
+same validation-based early stopping rule.
+
+Run training, validation, finalization, and the Tiny-versus-Large comparison
+sequentially on one A100 GPU:
+
+```bash
+conda activate vlm_clean
+cd "/home/ppaul11/computer vision/assignment1/assignment1"
+CUDA_VISIBLE_DEVICES=0 bash scripts/run_checkpoint6_convnext_large.sh cuda
+```
+
+The first run downloads torchvision's ConvNeXt-Large `IMAGENET1K_V1` weights
+if they are not already cached. The runner is resumable and performs no test
+evaluation or Git operation. Inspect these outputs before selecting the final
+model:
+
+```text
+results/checkpoint6/comparison.md
+reports/figures/checkpoint6/capacity_comparison.png
+results/checkpoint6/convnext_large_pretrained_all/summary.json
+reports/figures/checkpoint6/convnext_large_pretrained_all/loss_curve.png
+reports/figures/checkpoint6/convnext_large_pretrained_all/accuracy_curve.png
+```
+
+ConvNeXt-Large improved over ConvNeXt-Tiny by one validation image (96.25% vs.
+96.04%) while requiring 7.05x as many parameters and 7.71x as many estimated
+MACs. It was selected for the final accuracy result; ConvNeXt-Tiny is the more
+efficient practical model. The selected model was then evaluated once on the
+labeled test set, producing the final result reported at the top of this file.

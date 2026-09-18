@@ -6,7 +6,7 @@ OpenAI Codex is being used as a pair programmer. The student remains
 responsible for the experimental questions, architecture choices, verification,
 interpretation, and final report.
 
-## Representative assistance (living log)
+## Representative assistance
 
 1. Codex inspected the assignment handout and starter notebook, summarized the
    required deliverables, and converted them into a reproducible repository
@@ -16,21 +16,35 @@ interpretation, and final report.
    the `LivingRoom` training class and no exact train/test overlap.
 3. Codex implemented a deterministic stratified split that keeps exact
    duplicates together, plus shared training and evaluation utilities.
+4. Codex helped implement reusable experiment runners, progress/timing
+   instrumentation, model-freezing policies, result tables, and plotting
+   utilities. The student executed the experiments and interpreted whether
+   each proposed comparison was scientifically useful.
+5. Codex helped organize the final evidence and reproducibility instructions;
+   model selection remained based on the student's validation experiments.
 
 ## Verification performed by the student
 
-The student will review generated code, inspect the saved split summary, run
-the automated tests, and compare starter-model behavior with the supplied notebook
-before accepting experimental conclusions.
+The student reviewed generated code, inspected the saved split and dataset
+audit, ran the training and evaluation commands, checked the learning curves,
+and compared saved metrics before accepting experimental conclusions. Model
+construction and split tests were also used to catch integration errors.
 
 ## Incorrect, ineffective, or questionable suggestion
 
-To be completed with a real example encountered during development. We will
-not invent an AI failure after the experiments.
+The shared from-scratch recipe was initially treated as a reasonable way to
+compare MobileNetV3-Large with the other CNN families. MobileNet reached
+66.8% training accuracy but remained at the 6.25% chance level on validation,
+predicting one class for every image. The suggestion was ineffective for this
+architecture. The result was retained and diagnosed rather than discarded;
+later experiments used ImageNet pretraining and architecture-appropriate
+fine-tuning scopes.
 
 ## Important student decision
 
-The student chose to begin with the supplied CNN as a measured reference point.
-Any later architecture or training changes will be chosen after reviewing its
-validation behavior, computational cost, and failure modes rather than assuming
-in advance which experiments will succeed or fail.
+The student chose the experimental sequence: begin with the supplied CNN,
+respond to its overfitting with RGB augmentation and regularization, compare
+CNN families under one recipe, isolate the effect of pretraining and freezing,
+and finally scale the validation-winning ConvNeXt family. The student also
+decided to stop development after ConvNeXt-Large and preserve the labeled test
+set for a single final evaluation.

@@ -1,0 +1,3 @@
+model,validation_accuracy,validation_macro_f1,best_epoch,epochs_completed,parameters,model_size_mib,macs_per_image,training_seconds,peak_gpu_memory_mib
+ConvNeXt-Tiny (checkpoint 5),0.9604166666666667,0.9603774859005675,21,31,27832432,106.17230224609375,4454775552,191.1880564589519,2416.47900390625
+ConvNeXt-Large (checkpoint 6),0.9625,0.9627816526714101,2,12,196254928,748.6531372070312,34359922176,202.31714431289583,9364.5576171875

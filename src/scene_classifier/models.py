@@ -3,11 +3,13 @@ from __future__ import annotations
 import torch
 from torch import nn
 from torchvision.models import (
+    ConvNeXt_Large_Weights,
     ConvNeXt_Tiny_Weights,
     DenseNet121_Weights,
     EfficientNet_B0_Weights,
     ResNet18_Weights,
     ResNeXt50_32X4D_Weights,
+    convnext_large,
     convnext_tiny,
     densenet121,
     efficientnet_b0,
@@ -107,6 +109,7 @@ def _configure_transfer_scope(model: nn.Module, architecture: str, scope: str) -
             ),
         },
     }
+    policies["convnext_large"] = policies["convnext_tiny"]
     if architecture not in policies:
         raise ValueError(f"Unsupported transfer architecture: {architecture}")
 
@@ -234,6 +237,7 @@ def build_model(model_config: dict, num_classes: int, load_pretrained: bool | No
         "densenet121_transfer",
         "efficientnet_b0_transfer",
         "convnext_tiny_transfer",
+        "convnext_large_transfer",
     }:
         architecture = name.removesuffix("_transfer")
         scope = model_config.get("trainable_scope", "all")
@@ -263,10 +267,18 @@ def build_model(model_config: dict, num_classes: int, load_pretrained: bool | No
             model.classifier = nn.Sequential(
                 nn.Dropout(dropout), nn.Linear(in_features, num_classes)
             )
-        else:
+        elif architecture == "convnext_tiny":
             expected_weights = "IMAGENET1K_V1"
             weights = ConvNeXt_Tiny_Weights.IMAGENET1K_V1 if should_load else None
             model = convnext_tiny(weights=weights)
+            in_features = model.classifier[-1].in_features
+            model.classifier[-1] = nn.Sequential(
+                nn.Dropout(dropout), nn.Linear(in_features, num_classes)
+            )
+        else:
+            expected_weights = "IMAGENET1K_V1"
+            weights = ConvNeXt_Large_Weights.IMAGENET1K_V1 if should_load else None
+            model = convnext_large(weights=weights)
             in_features = model.classifier[-1].in_features
             model.classifier[-1] = nn.Sequential(
                 nn.Dropout(dropout), nn.Linear(in_features, num_classes)
